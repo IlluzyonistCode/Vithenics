@@ -1,0 +1,524 @@
+{
+  "list": [
+    {
+      "name": "Pull",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Towel Pull Up",
+            "Lying Arm Circles"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Assisted Pull Up",
+            "Negative Pull Up"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Pull Up",
+            "Chin Up"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Pull Up +5Kg",
+            "Typewriter Pull Up"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "High Pull Up",
+            "Pull Up +10Kg"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Archer Pull Up",
+            "Pull Up +20Kg"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "Assisted One Arm Pull Up",
+            "Pull Up +30Kg"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Little Assisted OAP",
+            "Pull Up +40Kg"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "One Arm Pull Up",
+            "Pull Up +50Kg"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Row",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Towel Row",
+            "Lying Arm Circles"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Body Row 45°",
+            "Assisted Pull Up"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Body Row",
+            "Table Row"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Adv. Body Row",
+            "Body Row +20Kg"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Archer Row",
+            "Pull Up"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Tuck Front Lever Row",
+            "One Arm Body Row"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "L Lever Row",
+            "Body Row +20Kg"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Adv. Tuck Front Lever Row",
+            "Body Row +30Kg"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "Straddle Front Lever Row",
+            "Front Lever"
+          ]
+        },
+        {
+          "level": 10,
+          "exercises": [
+            "Front Lever Row",
+            "Body Row +40Kg"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Push",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Incline Push Up",
+            "Knee Push Up"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Push Up",
+            "Diamond Push Up"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Push Up +10Kg",
+            "Wide Push Up"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Archer Push Up",
+            "Plyo Push Up"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Pseudo Push Ups",
+            "Push Up +20Kg"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Back Clap Push Up",
+            "Incline One Arm Push Up"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "Superman Push Up",
+            "Neg. One Arm Push Up"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Tuck Planche Push Up",
+            "Push Up +30Kg"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "Rocky Push Up",
+            "Push Up +40Kg"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "Adv. Tuck Planche Push Up",
+            "One Arm Push Up"
+          ]
+        },
+        {
+          "level": 10,
+          "exercises": [
+            "Straddle Planche Push Up",
+            "Push Up +60Kg"
+          ]
+        },
+        {
+          "level": 11,
+          "exercises": [
+            "Planche Push Up",
+            "Push Up +70Kg"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Press",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Pike Walk",
+            "Pike Hold"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Hindu Push Up",
+            "Wall Handstand"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Pike Push Up",
+            "Wall Walks"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Adv. Pike Push Up",
+            "Handstand"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Wall Handstand Push Up",
+            "Tuck Planche Push Up"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Handstand Push Up",
+            "Handstand Push Up"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "Tuck to Handstand",
+            "Adv. Tuck Planche Push Up"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Deep Handstand Push Up",
+            "Straddle Planche Push Up"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dip",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Bench Dip",
+            "Diamond Push Up"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Adv. Bench Dip",
+            "Triceps Extension"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Dip",
+            "Adv. Triceps Extension"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Straight Bar Dip",
+            "Tiger Bend Push Up"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Russian Dip",
+            "Ring Dip"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Dip +10Kg",
+            "Ring Dip"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "Dip +20Kg",
+            "Korean Dip"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Dip +30Kg",
+            "Archer Dip"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "Dip +40Kg",
+            "Clap Dip"
+          ]
+        },
+        {
+          "level": 10,
+          "exercises": [
+            "180 Dip",
+            "180 Dip"
+          ]
+        },
+        {
+          "level": 11,
+          "exercises": [
+            "Impossible Dip",
+            "Impossible Dip"
+          ]
+        },
+        {
+          "level": 12,
+          "exercises": [
+            "Tiger Bend HSPU",
+            "Deep Handstand Push Up"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Squat",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Chair Squat",
+            "Glute Bridge"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Squat",
+            "Split Squat"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Lunge",
+            "One Leg Glute Bridge",
+            "Deep Squat"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Bulgarian Squat",
+            "Jumping Squat"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Archer Squat",
+            "Curtsy Squat"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Squat +10Kg",
+            "Jump Squat with Tuck"
+          ]
+        },
+        {
+          "level": 7,
+          "exercises": [
+            "Squat +20Kg",
+            "Jumping Lunge"
+          ]
+        },
+        {
+          "level": 8,
+          "exercises": [
+            "Squat +30Kg",
+            "Assisted Pistol Squat"
+          ]
+        },
+        {
+          "level": 9,
+          "exercises": [
+            "Squat +40Kg",
+            "No Arm Shrimp Squat"
+          ]
+        },
+        {
+          "level": 10,
+          "exercises": [
+            "Elevated Pistol Squat",
+            "One Leg Jump Squat"
+          ]
+        },
+        {
+          "level": 11,
+          "exercises": [
+            "One Arm Shrimp Squat",
+            "Pistol Squat"
+          ]
+        },
+        {
+          "level": 12,
+          "exercises": [
+            "Squat +60Kg",
+            "Archer Squat +20Kg",
+            "Shrimp Squat"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Core",
+      "progressions": [
+        {
+          "level": 1,
+          "exercises": [
+            "Knee Raises",
+            "Straddle Leg Raises"
+          ]
+        },
+        {
+          "level": 2,
+          "exercises": [
+            "Leg Raise",
+            "Russian Twist"
+          ]
+        },
+        {
+          "level": 3,
+          "exercises": [
+            "Bicycle",
+            "Hollow Body Hold"
+          ]
+        },
+        {
+          "level": 4,
+          "exercises": [
+            "Bar Leg Raises",
+            "Advanced Leg Raises"
+          ]
+        },
+        {
+          "level": 5,
+          "exercises": [
+            "Toes to Bar",
+            "Hanging Oblique Raises"
+          ]
+        },
+        {
+          "level": 6,
+          "exercises": [
+            "Hanging Windshield Wipers",
+            "Jackknife"
+          ]
+        }
+      ]
+    }
+  ]
+}

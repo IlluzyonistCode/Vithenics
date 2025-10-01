@@ -1,0 +1,164 @@
+{
+  "achievements": [
+    {
+      "name": "First Steps",
+      "description": "Complete your first workout",
+      "criteria_type": "total_workouts",
+      "criteria_value": 1,
+      "icon": "🎯",
+      "category": "milestone"
+    },
+    {
+      "name": "Getting Started",
+      "description": "Complete 5 workouts",
+      "criteria_type": "total_workouts",
+      "criteria_value": 5,
+      "icon": "💪",
+      "category": "milestone"
+    },
+    {
+      "name": "Dedicated Athlete",
+      "description": "Complete 10 workouts",
+      "criteria_type": "total_workouts",
+      "criteria_value": 10,
+      "icon": "🏃",
+      "category": "milestone"
+    },
+    {
+      "name": "Fitness Enthusiast",
+      "description": "Complete 25 workouts",
+      "criteria_type": "total_workouts",
+      "criteria_value": 25,
+      "icon": "🔥",
+      "category": "milestone"
+    },
+    {
+      "name": "Workout Warrior",
+      "description": "Complete 50 workouts",
+      "criteria_type": "total_workouts",
+      "criteria_value": 50,
+      "icon": "⚡",
+      "category": "milestone"
+    },
+    {
+      "name": "Century Club",
+      "description": "Complete 100 workouts",
+      "criteria_type": "total_workouts",
+      "criteria_value": 100,
+      "icon": "🏆",
+      "category": "milestone"
+    },
+    {
+      "name": "Time Keeper",
+      "description": "Accumulate 60 minutes of workout time",
+      "criteria_type": "total_time",
+      "criteria_value": 60,
+      "icon": "⏰",
+      "category": "endurance"
+    },
+    {
+      "name": "Hour Master",
+      "description": "Accumulate 5 hours of workout time",
+      "criteria_type": "total_time",
+      "criteria_value": 300,
+      "icon": "⏳",
+      "category": "endurance"
+    },
+    {
+      "name": "Marathon Trainer",
+      "description": "Accumulate 10 hours of workout time",
+      "criteria_type": "total_time",
+      "criteria_value": 600,
+      "icon": "🏃‍♀️",
+      "category": "endurance"
+    },
+    {
+      "name": "Endurance Beast",
+      "description": "Accumulate 24 hours of workout time",
+      "criteria_type": "total_time",
+      "criteria_value": 1440,
+      "icon": "🦁",
+      "category": "endurance"
+    },
+    {
+      "name": "Iron Will",
+      "description": "Accumulate 50 hours of workout time",
+      "criteria_type": "total_time",
+      "criteria_value": 3000,
+      "icon": "🛡️",
+      "category": "endurance"
+    },
+    {
+      "name": "Consistency Champion",
+      "description": "Maintain a 3-day workout streak",
+      "criteria_type": "streak",
+      "criteria_value": 3,
+      "icon": "🔗",
+      "category": "consistency"
+    },
+    {
+      "name": "Week Warrior",
+      "description": "Maintain a 7-day workout streak",
+      "criteria_type": "streak",
+      "criteria_value": 7,
+      "icon": "📅",
+      "category": "consistency"
+    },
+    {
+      "name": "Streak Master",
+      "description": "Maintain a 14-day workout streak",
+      "criteria_type": "streak",
+      "criteria_value": 14,
+      "icon": "🔥",
+      "category": "consistency"
+    },
+    {
+      "name": "Unstoppable Force",
+      "description": "Maintain a 30-day workout streak",
+      "criteria_type": "streak",
+      "criteria_value": 30,
+      "icon": "🚀",
+      "category": "consistency"
+    },
+    {
+      "name": "Legend",
+      "description": "Maintain a 100-day workout streak",
+      "criteria_type": "streak",
+      "criteria_value": 100,
+      "icon": "👑",
+      "category": "consistency"
+    },
+    {
+      "name": "Skill Explorer",
+      "description": "Start working on 3 different skills",
+      "criteria_type": "progressions_completed",
+      "criteria_value": 3,
+      "icon": "🎭",
+      "category": "progression"
+    },
+    {
+      "name": "Progress Tracker",
+      "description": "Complete 5 skill progressions",
+      "criteria_type": "progressions_completed",
+      "criteria_value": 5,
+      "icon": "📈",
+      "category": "progression"
+    },
+    {
+      "name": "Skill Master",
+      "description": "Complete 10 skill progressions",
+      "criteria_type": "progressions_completed",
+      "criteria_value": 10,
+      "icon": "🎓",
+      "category": "progression"
+    },
+    {
+      "name": "Calisthenics Expert",
+      "description": "Complete 20 skill progressions",
+      "criteria_type": "progressions_completed",
+      "criteria_value": 20,
+      "icon": "🥇",
+      "category": "progression"
+    }
+  ]
+}
