@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Dumbbell } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import logo from '../vithenics-logo.png';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -47,7 +48,7 @@ const Login = () => {
       <div className='max-w-md w-full space-y-8'>
         <div>
           <div className='mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-black'>
-            <Dumbbell className='h-8 w-8 text-white' />
+            <img src={logo} alt='Vithenics' className='h-8 w-8' />
           </div>
           <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900'>
             Sign in to Vithenics
