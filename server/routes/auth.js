@@ -1,8 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { pool } = require('../config/db');
 const { generateToken, authToken } = require('../middleware/auth');
+const { sendPasswordResetEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -12,6 +14,7 @@ const formatUser = (user) => ({
   firstName: user.first_name,
   lastName: user.last_name,
   profileImage: user.profile_image_url,
+  onboardingCompleted: user.onboarding_completed === 1 || user.onboarding_completed === true,
   createdAt: user.created_at
 });
 
@@ -51,15 +54,15 @@ router.post('/register', [
     const userId = result.insertId;
     const token = generateToken(userId, email);
 
+    const [newUserRows] = await pool.execute(
+      'SELECT id, email, first_name, last_name, profile_image_url, onboarding_completed, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+
     res.status(201).json({
       message: 'User registered successfully',
       token,
-      user: {
-        id: userId,
-        email,
-        firstName: firstName || null,
-        lastName: lastName || null
-      }
+      user: formatUser(newUserRows[0])
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -77,7 +80,7 @@ router.post('/login', [
     const { email, password } = req.body;
 
     const [rows] = await pool.execute(
-      'SELECT id, email, password_hash, first_name, last_name, profile_image_url, is_active FROM users WHERE email = ?',
+      'SELECT id, email, password_hash, first_name, last_name, profile_image_url, onboarding_completed, is_active FROM users WHERE email = ?',
       [email]
     );
 
@@ -116,9 +119,29 @@ router.post('/forgot-password', [
       [email]
     );
 
-    if (users.length > 0)
-      console.log(`Password reset requested for user: ${email}`);
+    if (users.length > 0) {
+      const userId = users[0].id;
+      
+      await pool.execute(
+        'DELETE FROM password_reset_tokens WHERE user_id = ?',
+        [userId]
+      );
 
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1);
+
+      await pool.execute(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)',
+        [userId, resetToken, expiresAt]
+      );
+
+      try {
+        await sendPasswordResetEmail(email, resetToken);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+      }
+    }
     res.json({
       message: 'If an account with this email exists, a password reset link has been sent'
     });
@@ -129,10 +152,52 @@ router.post('/forgot-password', [
   }
 });
 
+router.post('/reset-password', [
+  body('token').notEmpty().withMessage('Reset token is required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  validateRequest
+], async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    const [tokens] = await pool.execute(
+      'SELECT user_id FROM password_reset_tokens WHERE token = ? AND expires_at > NOW()',
+      [token]
+    );
+
+    if (tokens.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const userId = tokens[0].user_id;
+
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    await pool.execute(
+      'UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [passwordHash, userId]
+    );
+
+    await pool.execute(
+      'DELETE FROM password_reset_tokens WHERE token = ?',
+      [token]
+    );
+
+    res.json({
+      message: 'Password has been reset successfully'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+
+    res.status(500).json({ error: 'Password reset failed' });
+  }
+});
+
 router.get('/verify', authToken, async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, email, first_name, last_name, profile_image_url, created_at FROM users WHERE id = ?',
+      'SELECT id, email, first_name, last_name, profile_image_url, onboarding_completed, created_at FROM users WHERE id = ?',
       [req.user.id]
     );
 

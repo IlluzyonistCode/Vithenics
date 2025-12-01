@@ -24,8 +24,10 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await authAPI.verify();
 
-          setUser(response.data.user);
+          const userData = response.data.user;
+          setUser(userData);
           setIsAuthenticated(true);
+          localStorage.setItem('user', JSON.stringify(userData));
         } catch (error) {
           localStorage.removeItem('authToken');
           localStorage.removeItem('user');
@@ -115,6 +117,16 @@ export const AuthProvider = ({ children }) => {
     }));
   };
 
+  const updateOnboardingStatus = (completed) => {
+    setUser(currentUser => ({
+      ...currentUser,
+      onboardingCompleted: completed
+    }));
+    const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    savedUser.onboardingCompleted = completed;
+    localStorage.setItem('user', JSON.stringify(savedUser));
+  };
+
   const value = {
     user,
     loading,
@@ -124,7 +136,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     forgotPassword,
-    updateUserProfileImage
+    updateUserProfileImage,
+    updateOnboardingStatus
   };
   
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

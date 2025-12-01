@@ -43,7 +43,7 @@ const Avatar = ({
     return (
       <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-200 ${className}`}>
         <img
-          src={`http://192.168.1.57:3000${src}`}
+          src={`http://192.168.1.57:5003${src}`}
           alt={alt}
           className='w-full h-full object-cover'
           onError={handleImageError}

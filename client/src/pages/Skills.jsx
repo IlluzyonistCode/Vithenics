@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { Button } from '../components/ui/button';
@@ -11,6 +12,7 @@ import MarkdownRenderer from '../components/MarkdownRenderer';
 import { toast } from 'sonner';
 
 const Skills = () => {
+    const navigate = useNavigate();
     const [skills, setSkills] = useState([]);
     const [categories, setCategories] = useState([]);
     const [userProgress, setUserProgress] = useState({});
@@ -23,6 +25,7 @@ const Skills = () => {
         repetitions: '',
         seconds: ''
     });
+    const [exercises, setExercises] = useState([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -30,7 +33,8 @@ const Skills = () => {
 
             await Promise.all([
                 fetchSkills(),
-                fetchUserProgress()
+                fetchUserProgress(),
+                fetchExercises()
             ]);
 
             setLoading(false);
@@ -38,6 +42,74 @@ const Skills = () => {
 
         loadData();
     }, []);
+
+    const fetchExercises = async () => {
+        try {
+            let allExercises = [];
+            let page = 1;
+            let hasMore = true;
+            
+            while (hasMore) {
+                const response = await api.get(`/exercises?page=${page}&limit=100`);
+                const exercises = response.data.exercises || [];
+                allExercises = [...allExercises, ...exercises];
+                
+                if (exercises.length < 100 || page * 100 >= response.data.pagination?.totalItems) {
+                    hasMore = false;
+                } else {
+                    page++;
+                }
+            }
+            
+            setExercises(allExercises);
+        } catch (error) {
+            console.error('Failed to fetch exercises:', error);
+        }
+    };
+
+    const findExerciseByName = (exerciseName) => {
+        if (!exerciseName || !exercises.length) return null;
+        
+        const normalizedSearch = exerciseName.toLowerCase().trim();
+        
+        let exercise = exercises.find(ex => 
+            ex.name.toLowerCase().trim() === normalizedSearch
+        );
+        
+        if (!exercise) {
+            exercise = exercises.find(ex => {
+                const normalizedEx = ex.name.toLowerCase().trim();
+                return normalizedEx.includes(normalizedSearch) || normalizedSearch.includes(normalizedEx);
+            });
+        }
+        
+        if (!exercise) {
+            const cleanSearch = normalizedSearch.replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ');
+            exercise = exercises.find(ex => {
+                const cleanEx = ex.name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ');
+                return cleanEx.includes(cleanSearch) || cleanSearch.includes(cleanEx);
+            });
+        }
+        
+        return exercise;
+    };
+
+    const handleExerciseClick = (e, exerciseName) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!exercises.length) {
+            toast.error('Exercises are still loading. Please try again in a moment.');
+            return;
+        }
+        
+        const exercise = findExerciseByName(exerciseName);
+        if (exercise) {
+            navigate(`/exercises?highlight=${exercise.id}`);
+        } else {
+            navigate(`/exercises?search=${encodeURIComponent(exerciseName)}`);
+        }
+    };
 
     const fetchSkills = async () => {
         try {
@@ -123,30 +195,52 @@ const Skills = () => {
 
             const currentProgress = userProgress[currentSkill.id] || { current_level: 1, personal_best: {} };
             const currentPersonalBest = currentProgress.personal_best || {};
+            
+            // Get input values
+            const inputSets = parseInt(workoutInput.sets) || 0;
+            const inputRepetitions = parseInt(workoutInput.repetitions) || 0;
+            const inputSeconds = parseInt(workoutInput.seconds) || 0;
+            
             const updatedPersonalBest = {
-                sets: Math.max(currentPersonalBest.sets || 0, parseInt(workoutInput.sets) || 0),
-                repetitions: Math.max(currentPersonalBest.repetitions || 0, parseInt(workoutInput.repetitions) || 0),
-                seconds: Math.max(currentPersonalBest.seconds || 0, parseInt(workoutInput.seconds) || 0)
+                sets: Math.max(currentPersonalBest.sets || 0, inputSets),
+                repetitions: Math.max(currentPersonalBest.repetitions || 0, inputRepetitions),
+                seconds: Math.max(currentPersonalBest.seconds || 0, inputSeconds)
             };
 
             let newLevel = currentProgress.current_level;
             const currentGoal = currentProgression.goal || 0;
+            const currentLevel = currentProgression.level || 1;
             
-            if (currentProgression.goalType === 'repetitions' && updatedPersonalBest.repetitions >= currentGoal)
-                newLevel = Math.max(newLevel, currentProgression.level + 1);
-            
-            else if (currentProgression.goalType === 'seconds' && updatedPersonalBest.seconds >= currentGoal)
-                newLevel = Math.max(newLevel, currentProgression.level + 1);
-            
-            else if (currentProgression.goalType === 'none' || !currentGoal)
-                newLevel = Math.max(newLevel, currentProgression.level);
+            if (currentLevel <= currentProgress.current_level + 1) {
+                let goalAchieved = false;
+                
+                if (currentProgression.goalType === 'repetitions' && inputRepetitions >= currentGoal) {
+                    goalAchieved = true;
+                } else if (currentProgression.goalType === 'seconds' && inputSeconds >= currentGoal) {
+                    goalAchieved = true;
+                } else if (currentProgression.goalType === 'sets' && inputSets >= currentGoal) {
+                    goalAchieved = true;
+                } else if (currentProgression.goalType === 'none' || !currentGoal) {
+                    goalAchieved = true;
+                }
+                
+                if (goalAchieved && currentLevel === currentProgress.current_level) {
+                    newLevel = currentLevel + 1;
+                } else if (goalAchieved && currentLevel < currentProgress.current_level) {
+                    newLevel = currentProgress.current_level;
+                } else {
+                    newLevel = currentProgress.current_level;
+                }
+            } else {
+                newLevel = currentProgress.current_level;
+            }
             
             const progressUpdate = {
                 skill_id: currentSkill.id,
                 current_level: newLevel,
-                sets: parseInt(workoutInput.sets) || 0,
-                repetitions: parseInt(workoutInput.repetitions) || 0,
-                seconds: parseInt(workoutInput.seconds) || 0,
+                sets: inputSets,
+                repetitions: inputRepetitions,
+                seconds: inputSeconds,
                 personal_best: updatedPersonalBest
             };
 
@@ -209,7 +303,7 @@ const Skills = () => {
 
     const getImagePath = (skillName) => {
         const baseName = skillName.toLowerCase().replace(/ /g, '_').replace(/-/g, '_');
-        const withPrefix = `http://192.168.1.57:3000/assets/images_exercise/ic_${baseName}.png`;
+        const withPrefix = `http://192.168.1.57:5003/assets/images_exercise/ic_${baseName}.png`;
 
         return withPrefix;
     };
@@ -296,7 +390,7 @@ const Skills = () => {
 
                                             return (
                                                 <AccordionItem value={`item-${index}`} key={index} disabled={locked}>
-                                                    <AccordionTrigger className={`${locked ? 'text-gray-400 cursor-not-allowed' : ''}`}>
+                                                    <AccordionTrigger className={`no-underline ${locked ? 'text-gray-400 cursor-not-allowed' : ''}`}>
                                                         <div className='flex items-center justify-between w-full pr-4'>
                                                             <span>
                                                                 {prog.name} (Level {prog.level})
@@ -310,7 +404,13 @@ const Skills = () => {
                                                         <ul className='list-disc pl-5 text-sm space-y-1 mb-3'>
                                                             {prog.plan && prog.plan.map((ex, exIndex) => (
                                                                 <li key={exIndex}>
-                                                                    {ex.name}: <strong>{ex.set} sets of {ex.beat}</strong>
+                                                                    <button
+                                                                        onClick={(e) => handleExerciseClick(e, ex.name)}
+                                                                        className='font-bold underline hover:no-underline'
+                                                                    >
+                                                                        {ex.name}
+                                                                    </button>
+                                                                    : <strong>{ex.set} sets of {ex.beat}</strong>
                                                                 </li>
                                                             ))}
                                                         </ul>

@@ -27,6 +27,13 @@ const Profile = () => {
     confirmPassword: ''
   });
 
+  const [emailChangeData, setEmailChangeData] = useState({
+    newEmail: '',
+    verificationCode: ''
+  });
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+
   useEffect(() => {
     if (user)
       setProfileData({
@@ -49,6 +56,87 @@ const Profile = () => {
       ...passwordData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleEmailChange = (e) => {
+    setEmailChangeData({
+      ...emailChangeData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleRequestEmailChange = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+
+    if (!emailChangeData.newEmail) {
+      setMessage({ type: 'error', text: 'Please enter a new email address' });
+      setLoading(false);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailChangeData.newEmail)) {
+      setMessage({ type: 'error', text: 'Please enter a valid email address' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await userAPI.requestEmailChange(emailChangeData.newEmail);
+      setMessage({ type: 'success', text: 'Verification code has been sent to your new email address' });
+      setIsVerifyingCode(true);
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to request email change';
+      setMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyEmailChange = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+
+    if (!emailChangeData.verificationCode) {
+      setMessage({ type: 'error', text: 'Please enter the verification code' });
+      setLoading(false);
+      return;
+    }
+
+    if (emailChangeData.verificationCode.length !== 6) {
+      setMessage({ type: 'error', text: 'Verification code must be 6 digits' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await userAPI.verifyEmailChange(emailChangeData.verificationCode);
+      updateUser({
+        ...user,
+        email: response.data.user.email
+      });
+      setProfileData({
+        ...profileData,
+        email: response.data.user.email
+      });
+      setMessage({ type: 'success', text: 'Email address has been updated successfully!' });
+      setIsChangingEmail(false);
+      setIsVerifyingCode(false);
+      setEmailChangeData({
+        newEmail: '',
+        verificationCode: ''
+      });
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'Failed to verify email change';
+      setMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageChange = async (base64Image, file) => {
@@ -242,15 +330,108 @@ const Profile = () => {
                 <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
                   Email Address
                 </label>
-                <input
-                  type='email'
-                  id='email'
-                  name='email'
-                  value={profileData.email}
-                  onChange={handleProfileChange}
-                  disabled={!isEditing}
-                  className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black disabled:bg-gray-50 disabled:text-gray-500'
-                />
+                <div className='mt-1 flex gap-2'>
+                  <input
+                    type='email'
+                    id='email'
+                    name='email'
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                    disabled={!isEditing || isChangingEmail}
+                    className='flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black disabled:bg-gray-50 disabled:text-gray-500'
+                  />
+                  {isEditing && !isChangingEmail && (
+                    <button
+                      type='button'
+                      onClick={() => setIsChangingEmail(true)}
+                      className='px-4 py-2 text-sm font-medium text-black border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black'
+                    >
+                      Change
+                    </button>
+                  )}
+                </div>
+                {isChangingEmail && (
+                  <div className='mt-4 p-4 bg-gray-50 rounded-md border border-gray-200'>
+                    {!isVerifyingCode ? (
+                      <form onSubmit={handleRequestEmailChange} className='space-y-4'>
+                        <div>
+                          <label htmlFor='newEmail' className='block text-sm font-medium text-gray-700 mb-1'>
+                            New Email Address
+                          </label>
+                          <input
+                            type='email'
+                            id='newEmail'
+                            name='newEmail'
+                            value={emailChangeData.newEmail}
+                            onChange={handleEmailChange}
+                            className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black'
+                            placeholder='Enter new email address'
+                          />
+                        </div>
+                        <div className='flex gap-2'>
+                          <button
+                            type='submit'
+                            disabled={loading}
+                            className='flex-1 px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed'
+                          >
+                            {loading ? 'Sending...' : 'Send Verification Code'}
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setIsChangingEmail(false);
+                              setEmailChangeData({ newEmail: '', verificationCode: '' });
+                            }}
+                            className='px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black'
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <form onSubmit={handleVerifyEmailChange} className='space-y-4'>
+                        <div>
+                          <label htmlFor='verificationCode' className='block text-sm font-medium text-gray-700 mb-1'>
+                            Verification Code
+                          </label>
+                          <p className='text-xs text-gray-500 mb-2'>
+                            Enter the 6-digit code sent to {emailChangeData.newEmail}
+                          </p>
+                          <input
+                            type='text'
+                            id='verificationCode'
+                            name='verificationCode'
+                            value={emailChangeData.verificationCode}
+                            onChange={handleEmailChange}
+                            maxLength={6}
+                            className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-center text-2xl tracking-widest'
+                            placeholder='000000'
+                          />
+                        </div>
+                        <div className='flex gap-2'>
+                          <button
+                            type='submit'
+                            disabled={loading}
+                            className='flex-1 px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed'
+                          >
+                            {loading ? 'Verifying...' : 'Verify & Change Email'}
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setIsChangingEmail(false);
+                              setIsVerifyingCode(false);
+                              setEmailChangeData({ newEmail: '', verificationCode: '' });
+                            }}
+                            className='px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black'
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                )}
               </div>
               {isEditing && (
                 <div className='flex justify-end'>

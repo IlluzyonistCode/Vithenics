@@ -1,10 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
 const { pool } = require('../config/db');
 const { authToken } = require('../middleware/auth');
+const { sendEmailVerificationCode } = require('../utils/email');
 
 const router = express.Router();
 
@@ -196,6 +198,120 @@ router.delete('/account', authToken, [
     console.error('Delete account error:', error);
 
     res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
+router.post('/request-email-change', authToken, [
+  body('newEmail').isEmail().normalizeEmail().withMessage('Please enter a valid email address'),
+  validateRequest
+], async (req, res) => {
+  try {
+    const { newEmail } = req.body;
+    const userId = req.user.id;
+
+    const [existing] = await pool.execute(
+      'SELECT id FROM users WHERE email = ? AND id != ?',
+      [newEmail, userId]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ error: 'This email is already in use' });
+    }
+
+    const [users] = await pool.execute(
+      'SELECT email FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentEmail = users[0].email;
+
+    if (newEmail === currentEmail) {
+      return res.status(400).json({ error: 'New email must be different from current email' });
+    }
+
+    await pool.execute(
+      'DELETE FROM email_verification_tokens WHERE user_id = ?',
+      [userId]
+    );
+
+    const verificationCode = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+    await pool.execute(
+      'INSERT INTO email_verification_tokens (user_id, new_email, token, expires_at) VALUES (?, ?, ?, ?)',
+      [userId, newEmail, verificationCode, expiresAt]
+    );
+
+    try {
+      await sendEmailVerificationCode(newEmail, verificationCode);
+    } catch (emailError) {
+      console.error('Failed to send email verification code:', emailError);
+      return res.status(500).json({ error: 'Failed to send verification code' });
+    }
+
+    res.json({
+      message: 'Verification code has been sent to your new email address'
+    });
+  } catch (error) {
+    console.error('Request email change error:', error);
+
+    res.status(500).json({ error: 'Failed to request email change' });
+  }
+});
+
+router.post('/verify-email-change', authToken, [
+  body('code').isLength({ min: 6, max: 6 }).withMessage('Verification code must be 6 digits'),
+  validateRequest
+], async (req, res) => {
+  try {
+    const { code } = req.body;
+    const userId = req.user.id;
+
+    const [tokens] = await pool.execute(
+      'SELECT new_email FROM email_verification_tokens WHERE user_id = ? AND token = ? AND expires_at > NOW()',
+      [userId, code]
+    );
+
+    if (tokens.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired verification code' });
+    }
+
+    const newEmail = tokens[0].new_email;
+
+    const [existing] = await pool.execute(
+      'SELECT id FROM users WHERE email = ? AND id != ?',
+      [newEmail, userId]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ error: 'This email is already in use' });
+    }
+
+    await pool.execute(
+      'UPDATE users SET email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [newEmail, userId]
+    );
+
+    await pool.execute(
+      'DELETE FROM email_verification_tokens WHERE user_id = ?',
+      [userId]
+    );
+
+    res.json({
+      message: 'Email address has been updated successfully',
+      user: {
+        email: newEmail
+      }
+    });
+  } catch (error) {
+    console.error('Verify email change error:', error);
+
+    res.status(500).json({ error: 'Failed to verify email change' });
   }
 });
 

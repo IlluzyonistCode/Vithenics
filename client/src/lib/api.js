@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL =  'http://192.168.1.57:3000/api';
+const API_BASE_URL =  'http://192.168.1.57:5003/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -25,10 +25,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-
-      window.location.href = '/login';
+      const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+      const currentPath = window.location.pathname;
+      
+      if (!publicRoutes.some(route => currentPath.includes(route))) {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
 
     return Promise.reject(error);
@@ -39,13 +43,16 @@ export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   verify: () => api.get('/auth/verify'),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email })
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (data) => api.post('/auth/reset-password', data)
 };
 
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (profileData) => api.put('/users/profile', profileData),
   changePassword: (passwordData) => api.put('/users/change-password', passwordData),
+  requestEmailChange: (newEmail) => api.post('/users/request-email-change', { newEmail }),
+  verifyEmailChange: (code) => api.post('/users/verify-email-change', { code }),
   updateProfileImage: (formData) => api.post('/users/profile-image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
@@ -94,6 +101,11 @@ export const historyAPI = {
 
 export const healthAPI = {
   check: () => api.get('/health')
+};
+
+export const onboardingAPI = {
+  getStatus: () => api.get('/onboarding/status'),
+  complete: (data) => api.post('/onboarding/complete', data)
 };
 
 export default api;

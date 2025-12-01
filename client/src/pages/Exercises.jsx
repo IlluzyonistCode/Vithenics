@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, Target, Zap, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -12,6 +13,7 @@ import api from '../lib/api';
 import { toast } from 'sonner';
 
 const Exercises = () => {
+    const [searchParams] = useSearchParams();
     const [exercises, setExercises] = useState([]);
     const [muscleGroups, setMuscleGroups] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,6 +24,7 @@ const Exercises = () => {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
     const [expandedCards, setExpandedCards] = useState({});
+    const [highlightedExerciseId, setHighlightedExerciseId] = useState(null);
 
     const toggleCardExpansion = (exerciseId) => {
         setExpandedCards(prev => ({
@@ -31,22 +34,89 @@ const Exercises = () => {
     };
 
     useEffect(() => {
-        fetchExercises();
         fetchMuscleGroups();
     }, []);
 
     useEffect(() => {
-        const delayedSearch = setTimeout(() => {
-            setPage(1);
+        const highlightId = searchParams.get('highlight');
+        
+        if (highlightId) {
+            const findAndLoadHighlightedExercise = async () => {
+                try {
+                    const exerciseId = parseInt(highlightId);
+                    
+                    const params = new URLSearchParams();
+                    params.append('limit', '1000');
+                    
+                    if (searchTerm) params.append('search', searchTerm);
+                    if (selectedMuscleGroup !== 'all') params.append('muscleGroup', selectedMuscleGroup);
+                    if (selectedDifficulty !== 'all') params.append('difficulty', selectedDifficulty);
+                    if (selectedEquipment !== 'all') params.append('equipment', selectedEquipment);
+                    
+                    const allExercisesResponse = await api.get(`/exercises?${params.toString()}`);
+                    const allExercises = allExercisesResponse.data.exercises || [];
+                    
+                    const exerciseIndex = allExercises.findIndex(ex => ex.id === exerciseId);
+                    
+                    if (exerciseIndex !== -1) {
+                        const exercisesPerPage = 12;
+                        const targetPage = Math.floor(exerciseIndex / exercisesPerPage) + 1;
+                        
+                        setPage(targetPage);
+                        setHighlightedExerciseId(exerciseId);
+                    } else {
+                        console.error('Exercise not found with current filters');
+                        fetchExercises();
+                    }
+                } catch (error) {
+                    console.error('Failed to find highlighted exercise:', error);
+                    fetchExercises();
+                }
+            };
+            
+            findAndLoadHighlightedExercise();
+        } else {
             fetchExercises();
-        }, 300);
+        }
+    }, [searchParams, searchTerm, selectedMuscleGroup, selectedDifficulty, selectedEquipment]);
 
-        return () => clearTimeout(delayedSearch);
-    }, [searchTerm, selectedMuscleGroup, selectedDifficulty, selectedEquipment]);
+    useEffect(() => {
+        const highlightId = searchParams.get('highlight');
+        if (!highlightId) {
+            const delayedSearch = setTimeout(() => {
+                setPage(1);
+                fetchExercises();
+            }, 300);
+
+            return () => clearTimeout(delayedSearch);
+        }
+    }, [searchTerm, selectedMuscleGroup, selectedDifficulty, selectedEquipment, searchParams]);
 
     useEffect(() => {
         fetchExercises();
     }, [page]);
+    
+    useEffect(() => {
+        const highlightId = searchParams.get('highlight');
+        if (highlightId && exercises.length > 0) {
+            const exerciseId = parseInt(highlightId);
+            const exerciseExists = exercises.find(ex => ex.id === exerciseId);
+            
+            if (exerciseExists) {
+                setExpandedCards(prev => ({
+                    ...prev,
+                    [exerciseId]: true
+                }));
+                
+                setTimeout(() => {
+                    const element = document.getElementById(`exercise-${exerciseId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
+        }
+    }, [exercises, searchParams]);
 
     const fetchExercises = async () => {
         try {
@@ -153,7 +223,7 @@ const Exercises = () => {
 
     const getImagePath = (exerciseName) => {
         const baseName = exerciseName.toLowerCase().replace(/\+\d+kg/, 'weighted').replace(/ /g, '_').replace(/-/g, '_').replace(/\./g, '').replace(/°/g, '');
-        const withPrefix = `http://192.168.1.57:3000/assets/images_exercises_white/ic_${baseName}_white.png`;
+        const withPrefix = `http://192.168.1.57:5003/assets/images_exercises_white/ic_${baseName}_white.png`;
 
         return withPrefix;
     };
@@ -248,7 +318,8 @@ const Exercises = () => {
                     exercises.map((exercise) => (
                         <Card 
                             key={exercise.id} 
-                            className='hover:shadow-md transition-shadow cursor-pointer' 
+                            id={`exercise-${exercise.id}`}
+                            className='hover:shadow-md transition-shadow cursor-pointer'
                             onClick={() => toggleCardExpansion(exercise.id)}
                         >
                             <CardHeader>

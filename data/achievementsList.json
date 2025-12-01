@@ -84,7 +84,7 @@
       "name": "Iron Will",
       "description": "Accumulate 50 hours of workout time",
       "criteria_type": "total_time",
-      "criteria_value": 3000,
+      "criteria_value": 5003,
       "icon": "🛡️",
       "category": "endurance"
     },

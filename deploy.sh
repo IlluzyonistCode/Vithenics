@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd /root/Vithenics/server/
+cd /opt/vithenics/server/
 pm2 start ./index.js --name "vithenics-server" --env local
 pm2 startup
 pm2 save
 cd ../client/
 npm run build
-cp -r /root/Vithenics/client/dist/* /var/www/vithenics/
+cp -r /opt/vithenics/client/dist/* /var/www/vithenics/

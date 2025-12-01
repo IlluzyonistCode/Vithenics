@@ -49,6 +49,7 @@ const initializeDatabase = async () => {
         height DECIMAL(5,2),
         weight DECIMAL(5,2),
         profile_image_url VARCHAR(500),
+        onboarding_completed BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         is_active BOOLEAN DEFAULT TRUE
@@ -163,6 +164,33 @@ const initializeDatabase = async () => {
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
           FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE,
           UNIQUE(user_id, achievement_id)
+      )
+    `);
+
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_token (token),
+        INDEX idx_expires (expires_at)
+      )
+    `);
+
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS email_verification_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        new_email VARCHAR(255) NOT NULL,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_token (token),
+        INDEX idx_expires (expires_at)
       )
     `);
 

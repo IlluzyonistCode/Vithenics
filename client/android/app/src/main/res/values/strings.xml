@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vithenics</string>
+    <string name="title_activity_main">Vithenics</string>
+    <string name="package_name">com.vithenics.app</string>
+    <string name="custom_url_scheme">com.vithenics.app</string>
+</resources>

@@ -82,7 +82,7 @@ const Layout = () => {
             <div className='flex items-center'>
               <div className='flex-shrink-0'>
                 {user?.profileImage ? (
-                    <img src={`http://192.168.1.57:3000${user.profileImage}`} alt='Avatar' className='h-8 w-8 rounded-full' />
+                    <img src={`http://192.168.1.57:5003${user.profileImage}`} alt='Avatar' className='h-8 w-8 rounded-full object-cover' />
                 ) : (
                     <div className='h-8 w-8 rounded-full bg-black flex items-center justify-center'>
                         <User className='h-5 w-5 text-white' />
@@ -150,7 +150,7 @@ const Layout = () => {
             <div className='flex items-center'>
                 <div className='flex-shrink-0'>
                     {user?.profileImage ? (
-                      <img src={`http://192.168.1.57:3000${user.profileImage}`} alt='Avatar' className='h-8 w-8 rounded-full' />
+                      <img src={`http://192.168.1.57:5003${user.profileImage}`} alt='Avatar' className='h-8 w-8 rounded-full object-cover' />
                     ) : (
                       <div className='h-8 w-8 rounded-full bg-black flex items-center justify-center'>
                         <User className='h-5 w-5 text-white' />
@@ -203,7 +203,7 @@ const Layout = () => {
                 </span>
                 <div className='flex-shrink-0'>
                     {user?.profileImage ? (
-                      <img src={`http://192.168.1.57:3000${user.profileImage}`} alt={user.firstName} className='h-8 w-8 rounded-full' />
+                      <img src={`http://192.168.1.57:5003${user.profileImage}`} alt={user.firstName} className='h-8 w-8 rounded-full object-cover' />
                     ) : (
                       <div className='h-8 w-8 rounded-full bg-black flex items-center justify-center'>
                         <User className='h-5 w-5 text-white' />

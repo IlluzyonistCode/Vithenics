@@ -1,0 +1,146 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.vithenics.app"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.vithenics.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+// Task to replace development URLs with production URLs in built files
+// This runs after Capacitor copies files and before assets are packaged
+task replaceProductionUrls {
+    description = 'Replace development URLs with production URLs in built assets'
+    doLast {
+        def assetsDir = file("${projectDir}/src/main/assets/public")
+        if (!assetsDir.exists()) {
+            println "Assets directory not found: ${assetsDir}, skipping URL replacement"
+            return
+        }
+        
+        def productionUrl = "https://vithenics.ydns.eu:7003"
+        def productionUrlNoPort = "https://vithenics.ydns.eu"
+        
+        def patterns = [
+            [pattern: "http://192.168.1.57:5003/api", replacement: "${productionUrl}/api"],
+            [pattern: "http://localhost:5003/api", replacement: "${productionUrl}/api"],
+            [pattern: "http://127.0.0.1:5003/api", replacement: "${productionUrl}/api"],
+            [pattern: "http://192.168.1.57:5003", replacement: productionUrl],
+            [pattern: "http://localhost:5003", replacement: productionUrl],
+            [pattern: "http://127.0.0.1:5003", replacement: productionUrl],
+            [pattern: "http://192.168.1.57:5173", replacement: productionUrlNoPort],
+            [pattern: "http://localhost:5173", replacement: productionUrlNoPort],
+            [pattern: "http://127.0.0.1:5173", replacement: productionUrlNoPort]
+        ]
+        
+        def fileCount = 0
+        def changeCount = 0
+        def totalFiles = 0
+        
+        println "Starting URL replacement in: ${assetsDir}"
+        
+        assetsDir.eachFileRecurse { file ->
+            if (file.isFile() && (file.name.endsWith('.js') || file.name.endsWith('.js.map') || file.name.endsWith('.html'))) {
+                totalFiles++
+                try {
+                    def content = file.getText('UTF-8')
+                    def originalContent = content
+                    def localChangeCount = 0
+                    def changed = false
+                    
+                    patterns.each { pattern ->
+                        if (content.contains(pattern.pattern)) {
+                            def beforeLength = content.length()
+                            content = content.replace(pattern.pattern, pattern.replacement)
+                            def afterLength = content.length()
+                            if (beforeLength != afterLength) {
+                                localChangeCount++
+                                changed = true
+                                println "  Found pattern '${pattern.pattern}' in ${file.name}"
+                            }
+                        }
+                    }
+                    
+                    if (content != originalContent) {
+                        file.setText(content, 'UTF-8')
+                        fileCount++
+                        changeCount += localChangeCount
+                        println "✓ Updated: ${file.path} (${localChangeCount} replacements)"
+                    }
+                } catch (Exception e) {
+                    println "✗ Error processing ${file.path}: ${e.message}"
+                    e.printStackTrace()
+                }
+            }
+        }
+        
+        println "Processed ${totalFiles} file(s)"
+        if (fileCount > 0) {
+            println "✓ Replaced URLs in ${fileCount} file(s) with ${changeCount} change(s)"
+        } else {
+            println "⚠ No files needed URL replacement (all URLs may already be production or files don't contain development URLs)"
+        }
+    }
+}
+
+// Hook the task to run after Capacitor sync but before assets are merged
+afterEvaluate {
+    // Run replaceProductionUrls task before mergeAssets tasks
+    tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.all { mergeTask ->
+        mergeTask.dependsOn replaceProductionUrls
+    }
+    // Also run before package tasks as backup
+    tasks.matching { it.name.startsWith('package') && (it.name.contains('Debug') || it.name.contains('Release')) }.all { packageTask ->
+        packageTask.dependsOn replaceProductionUrls
+    }
+    // Ensure it runs before processDebugResources/processReleaseResources
+    tasks.matching { it.name == 'processDebugResources' || it.name == 'processReleaseResources' }.all { processTask ->
+        processTask.dependsOn replaceProductionUrls
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

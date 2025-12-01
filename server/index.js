@@ -14,12 +14,13 @@ const progressionsRoutes = require('./routes/progressions');
 const progressRoutes = require('./routes/progress');
 const historyRoutes = require('./routes/history');
 const { router: achievementsRoutes } = require('./routes/achievements');
+const onboardingRoutes = require('./routes/onboarding');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'http://192.168.1.57:5173',
+  origin: ['http://192.168.1.57:5173', 'http://localhost:5173', 'https://localhost'],
   credentials: true
 }));
 
@@ -38,6 +39,7 @@ app.use('/api/progressions', progressionsRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/achievements', achievementsRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

@@ -1,0 +1,23 @@
+{
+  "appId": "com.vithenics.app",
+  "appName": "Vithenics",
+  "webDir": "dist",
+  "plugins": {
+    "StatusBar": {
+      "visible": false,
+      "overlaysWebView": true
+    }
+  },
+  "server": {
+    "android": {
+      "allowMixedContent": true,
+      "cleartext": true
+    }
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "",
+      "keystoreAlias": ""
+    }
+  }
+}
