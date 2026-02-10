@@ -13,7 +13,7 @@ else
     SED_INPLACE="sed -i"
 fi
 
-DOMAIN="vithenics.ydns.eu"
+DOMAIN="vithenics.corruptor.pro"
 PORT="7003"
 PRODUCTION_URL="https://${DOMAIN}:${PORT}"
 PRODUCTION_URL_NO_PORT="https://${DOMAIN}"
